@@ -162,7 +162,6 @@ void task1(void *pvParameters)
 		}
 	}*/
  }
- vTaskDelete(NULL);
 }
 
 void user_init(void)

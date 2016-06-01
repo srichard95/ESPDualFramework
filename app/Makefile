@@ -11,8 +11,8 @@
 #     subdir/lib to be extracted and rolled up into
 #     a generated lib/image xxx.a ()
 #
-export SDK_PATH=/mnt/Share/ESP8266_RTOS_SDK_v1.4
-export BIN_PATH=/mnt/Share/ESP8266_RTOS_SDK_v1.4/bin
+export SDK_PATH=/mnt/Share/ESPDualFramework
+export BIN_PATH=/mnt/Share/ESPDualFramework/bin
 
 TARGET = eagle
 #FLAVOR = release
