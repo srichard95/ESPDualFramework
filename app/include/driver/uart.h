@@ -277,11 +277,10 @@ void UART_SetLineInverse(UART_Port uart_no, UART_LineLevelInverse inverse_mask) 
   *  
   * @return  null
   */
-void uart_init_new(void);
 
 void ICACHE_FLASH_ATTR uart_tx_one_char(uint8 uart, uint8 TxChar);
 
-void ICACHE_FLASH_ATTR  uart_init(void);
+void ICACHE_FLASH_ATTR  UartDriverInit(void);
 
 #define uart_getchar() uart_getchar_ms(-1);
 int ICACHE_FLASH_ATTR uart_getchar_ms(int timeout);

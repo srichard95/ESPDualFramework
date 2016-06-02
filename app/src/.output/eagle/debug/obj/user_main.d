@@ -82,7 +82,7 @@
  /mnt/Share/ESPDualFramework/include/freertos/queue.h \
  /mnt/Share/ESPDualFramework/include/freertos/queue.h \
  ../include/driver/uart.h ../include/DataLinkLayer.h \
+ /mnt/Share/ESPDualFramework/include/freertos/FreeRTOSConfig.h \
  ../include/networklayer.h \
  /mnt/Share/ESPDualFramework/include/espressif/espconn.h \
- ../include/user_config.h ../include/DataLinkLayer.h \
- /mnt/Share/ESPDualFramework/include/freertos/FreeRTOSConfig.h
+ ../include/user_config.h ../include/DataLinkLayer.h

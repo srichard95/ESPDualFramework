@@ -1,79 +1,68 @@
 #include "DataLinkLayer.h"
 
-bool sync = false;
+char InBuffer[FRAME_SIZE_BYTE];		//InBuffer contains the frame which read from the FIFO
+int BuffPointer = 0;				//Point the next place inside the InBuffer
 
-char InBuffer[FRAME_SIZE_BYTE];
-int BuffPointer = 0;
 /*
-*	Name: uart_isr_handle
+*	Name: UartISRHandle
 *	Description: Handle the interrupt of the uart.
 *				 Frame processing is happening here.
 */
-void ICACHE_FLASH_ATTR
-uart_isr_handle(void)
+void UartISRHandle(void *pvParameters)
 {
+	while(1){
 
-	//int rxbytes = uart_rx_available();
-
-	//while(rxbytes > 0)
-	//{
 		InBuffer[BuffPointer] = uart_getchar();
 		BuffPointer++;
-
 
 		if(BuffPointer == FRAME_SIZE_BYTE)
 		{
 			BuffPointer = 0;
 			if(CheckCRC(InBuffer) == 0)
-			{
-				//sendDatagram(InBuffer, FRAME_SIZE_BYTE);
 				PutFrameInQueue();
-				//uart_send_frame(InBuffer);
-			}
 			else
-			{
-				/*sendDatagram("CRC FAIL!", 9);
-				sendDatagram(InBuffer, FRAME_SIZE_BYTE);*/
-				Sync_procedure();
-				//break;
-			}
+				SyncProcedure();
 		}
-
-	//rxbytes = uart_rx_available();
-	//}
-	return;
+	}
 }
 
+/*
+*	Name: SyncProcedure
+*	Description: Sync algorithm works here
+*
+*/
 void ICACHE_FLASH_ATTR
-Sync_procedure(void)
+SyncProcedure(void)
 {
   int SyncTimeout = 0;
-  int FFs = 0;
-  char c;
+  int FFs = 0;								//Counts the 'FFs' which come on uart
+  char c;									//Contains the next actual byte which read from the uart
 
   SendSyncFrame();
-  //sendDatagram("SYNC 1!", 7);
 
-  while(FFs != FRAME_SIZE_BYTE)
+  while(FFs != FRAME_SIZE_BYTE)				//Until we can't catch 'FRAME_SIZE_BYTE' pieces byte from uart
   {
-    SyncTimeout++;
-    c = uart_getchar_ms(1);
+    SyncTimeout++;							//Counts the timeout
+    c = uart_getchar_ms(1);					//Gets the next byte from uart and store it in 'c'
     if(c == 0xFF)
     {
-      FFs++;
+      FFs++;								//Increase the 'FFs' counter
       c = 0x00;
-      //sendDatagram("SYNC 2!", 7);
     }
-    if(SyncTimeout >= SYNC_TIMEOUT_THRS){
-      SendSyncFrame();
+    if(SyncTimeout >= SYNC_TIMEOUT_THRS){	//If we hadn't got 'FRAME_SIZE_BYTE' pieces 'FF' byte for a while we resend
+      SendSyncFrame();						//the sync frame
       SyncTimeout = 0;
       uart_rx_flush();
-      //sendDatagram("SYNC 3!", 7);
     }
   }
   return;
 }
 
+/*
+*	Name: SendSyncFrame
+*	Description: Sends a single sync frame via
+*				 uart.
+*/
 void ICACHE_FLASH_ATTR
 SendSyncFrame(void)
 {
@@ -81,39 +70,27 @@ SendSyncFrame(void)
 	int i;
 	for (i = 0; i < FRAME_SIZE_BYTE; ++i)
 		sync_frame[i] = 0xFF;
-	uart_send_frame(sync_frame);
+	UartSendFrame(sync_frame);
 	return;
 }
+
+/*
+*	Name: UartSendFrame
+*	Description: Sends a single frame through uart.
+*				 
+*/
 void ICACHE_FLASH_ATTR
-ResetBuffer(void)
-{
-	int i;
-	for (i = 0; i < FRAME_SIZE_BYTE; ++i)
-		InBuffer[i] = 0x00;
-}
-
-
-
-bool ICACHE_FLASH_ATTR
-IsSyncFrame(char *frame)
-{
-	int i;
-	bool result = true;
-	for (i = 0; i < FRAME_SIZE_BYTE; ++i)
-		if(frame[i] != 0xFF)
-			result = false;
-	return result;
-}
-
-
-
-void ICACHE_FLASH_ATTR
-uart_send_frame(char *frame){
+UartSendFrame(char *frame){
 	int i;
 	for (i = 0; i < FRAME_SIZE_BYTE; ++i)
 		uart_tx_one_char(UART0, frame[i]);
 }
 
+/*
+*	Name: PutFrameInQueue
+*	Description: Puts a frame from 'InBuffer' into the 'xUartRxQueue'.
+*				 The NetworkLayer read the frames from the xUartRxQueue.
+*/
 void ICACHE_FLASH_ATTR
 PutFrameInQueue(){
 	struct FrameStruct Temp;
@@ -128,30 +105,15 @@ PutFrameInQueue(){
 	return;
 }
 
-
 /*
+*	Name: DLLinit
+*	Description: Initialize the DataLinkLayer.
+*				 Starts the UartISRHandle task.
+*/
 void ICACHE_FLASH_ATTR
-uart_init()
-{
-	UART_ConfigTypeDef uart_config; 
-	uart_config.baud_rate = BIT_RATE_921600;
-	uart_config.data_bits = UART_WordLength_8b;
-	uart_config.parity = USART_Parity_None;
-	uart_config.stop_bits = USART_StopBits_1;
-	uart_config.flow_ctrl = USART_HardwareFlowControl_None;
-	uart_config.UART_RxFlowThresh = 120;
-	uart_config.UART_InverseMask = UART_None_Inverse;
-	UART_ParamConfig(UART0, &uart_config);
-
-
-	if(DEBUG_ON)
-		UART_SetPrintPort(UART0);
-	else
-		UART_SetPrintPort(UART1);
-
-	xSemaphore = NULL;
-	vSemaphoreCreateBinary( xSemaphore );
-	//uart_rx_init();
-}*/
+DLLinit(){
+	xTaskCreate(UartISRHandle, "UartISRHandle", 256, NULL, tskIDLE_PRIORITY+2, NULL);
+	return;
+}
 
 

@@ -77,6 +77,7 @@
  /mnt/Share/ESPDualFramework/include/espressif/smartconfig.h \
  /mnt/Share/ESPDualFramework/include/espressif/spi_flash.h \
  /mnt/Share/ESPDualFramework/include/espressif/pwm.h \
+ /mnt/Share/ESPDualFramework/include/freertos/FreeRTOSConfig.h \
  /mnt/Share/ESPDualFramework/include/freertos/semphr.h \
  /mnt/Share/ESPDualFramework/include/freertos/queue.h \
  /mnt/Share/ESPDualFramework/include/freertos/queue.h \

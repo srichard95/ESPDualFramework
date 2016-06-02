@@ -25,6 +25,8 @@
 #ifndef __USER_CONFIG_H__
 #define __USER_CONFIG_H__
 
+#define DEBUG_ON	0			//DEBUG function on/off
+
 #define DEMO_AP_SSID "ESP_TEST_1234"
 #define DEMO_AP_PASSWORD "12345678"
 
